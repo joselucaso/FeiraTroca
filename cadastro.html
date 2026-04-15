@@ -10,21 +10,20 @@
 
 <body>
     <div class="container">
-        <h3 style="color: #6c757d; margin-top: -10px; margin-bottom: 20px;">Novo Usuário</h3>
+        <h3 style="color: #333; margin-top: 0; margin-bottom: 5px;">👤 Novo Usuário</h3>
+        <p style="font-size: 0.9rem; color: #888; margin-bottom: 25px;">Registre uma nova pessoa para<br>começar a usar o sistema.</p>
 
-        <input type="text" id="regIdUser" placeholder="Digite o RA ou CPF..." inputmode="numeric" maxlength="11"
+        <input type="text" id="regIdUser" placeholder="RA ou CPF (Somente números)" inputmode="numeric" maxlength="11"
             oninput="this.value = this.value.replace(/\D/g, '')">
-        <input type="text" id="regNome" placeholder="Digite o Nome Completo..."
-            oninput="this.value = this.value.toUpperCase()">
+            
+        <input type="text" id="regNome" placeholder="Nome Completo"
+            oninput="this.value = this.value.toUpperCase()" style="text-transform: uppercase;">
 
-        <button onclick="salvarCliente()" class="btn-salvar">Salvar</button>
+        <button onclick="salvarCliente()" class="btn-salvar" style="font-size: 1.1rem; padding: 16px; border-radius: 12px; margin-top: 10px;">✨ Cadastrar no Sistema</button>
 
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-        <div class="navegacao" style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px; align-items: center;">
+        <div class="navegacao" style="margin-top: 30px; display: flex; flex-direction: column; gap: 8px; align-items: center;">
             <a href="index.html"
-                style="text-decoration: none; display: block; background-color: #6c757d; color: white; padding: 12px; text-align: center; border-radius: 6px; font-weight: bold;">⬅️
-                Voltar para a Home</a>
+                style="text-decoration: none; width: 100%; box-sizing: border-box; background-color: #eee; color: #444; padding: 14px; text-align: center; border-radius: 12px; font-weight: 700; font-size: 0.95rem;">⬅️ Voltar ao Início</a>
         </div>
 
         <div class="rodape-creditos">
@@ -32,12 +31,13 @@
         </div>
     </div>
 
+    <!-- Overlay de Status Premium -->
     <div id="loadingOverlay" class="loading-overlay">
         <div id="loadingIcon" class="spinner"></div>
-        <div id="statusIcon" class="icon-status"></div>
-        <span id="loadingTexto">Salvando no Sistema...</span>
-        <p id="loadingDesc" style="font-size: 0.8rem; color: #888; margin-top: 10px;">Isso pode levar alguns segundos</p>
-        <button id="btnFecharOverlay" class="btn-fechar-overlay" onclick="fecharOverlay()">Voltar</button>
+        <div id="statusIcon" class="icon-status" style="font-size: 5rem;"></div>
+        <span id="loadingTexto">Processando...</span>
+        <p id="loadingDesc" style="font-size: 0.9rem; color: #666; margin-top: 10px; max-width: 250px;">Aguarde um momento enquanto salvamos os dados.</p>
+        <button id="btnFecharOverlay" class="btn-fechar-overlay" onclick="fecharOverlay()" style="border-radius: 12px; font-weight: 700;">Entendido</button>
     </div>
 
     <script src="script.js"></script>

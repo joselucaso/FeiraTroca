@@ -10,49 +10,44 @@
 
 <body>
     <div class="container">
-        <h3 style="color: #6c757d; margin-top: -10px; margin-bottom: 10px;">Meus Pontos</h3>
-        <p style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">Consulte seus pontos usando apenas o RA ou CPF.</p>
+        <h3>📊 Meus Pontos</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px; line-height: 1.5;">Consulte seu saldo e histórico usando<br>apenas o seu RA ou CPF.</p>
 
         <div class="cliente-info">
             <div class="busca-container">
-                <input type="text" id="nomeCliente" placeholder="Digite o RA ou CPF..." inputmode="numeric" maxlength="11"
+                <input type="text" id="nomeCliente" placeholder="RA ou CPF" inputmode="numeric" maxlength="11"
                     oninput="this.value = this.value.replace(/\D/g, '')">
-                <button onclick="buscarPorIdUser()" class="btn-buscar">🔍 Buscar</button>
+                <button onclick="buscarPorIdUser()" class="btn-buscar">Buscar</button>
             </div>
 
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-            <div class="info-cliente">
-                <p style="font-size: 0.9rem; font-weight: normal; margin-bottom: 8px; color: #555;">
-                    Usuário: <span id="nomeExibicao" style="font-weight: normal; color: #333;">---</span>
-                </p>
-                <p>Saldo: <span id="saldoPontos">0</span></p>
+            <div class="placar">
+                <span id="nomeExibicao" style="font-size: 0.85rem; color: #888; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Aguardando Busca</span>
+                <span id="saldoPontos">0</span>
+                <span style="font-size: 0.8rem; color: #aaa; font-weight: 600;">Pontos</span>
             </div>
 
             <div id="historicoTransacoes" class="extrato-container" style="display: none;">
-                <h4>Histórico de Movimentação</h4>
+                <h4 style="font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 15px; font-weight: 800; letter-spacing: 1px;">Histórico de Movimentações</h4>
                 <div id="listaExtrato"></div>
             </div>
 
-
-            <div class="navegacao" style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px; align-items: center;">
+            <div class="navegacao" style="margin-top: 30px; display: flex; flex-direction: column; gap: 8px; align-items: center;">
                 <a href="index.html"
-                    style="text-decoration: none; display: block; background-color: #6c757d; color: white; padding: 12px; text-align: center; border-radius: 6px; font-weight: bold;">⬅️
-                    Voltar para a Home</a>
+                    style="text-decoration: none; width: 100%; box-sizing: border-box; background-color: #eee; color: #444; padding: 14px; text-align: center; border-radius: 12px; font-weight: 700; font-size: 0.95rem;">⬅️ Voltar ao Início</a>
             </div>
+        </div>
 
-            <div class="rodape-creditos">
-                Desenvolvido por <strong>José Oliveira</strong>
-            </div>
+        <div class="rodape-creditos">
+            Desenvolvido por <strong>José Oliveira</strong>
         </div>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
         <div id="loadingIcon" class="spinner"></div>
-        <div id="statusIcon" class="icon-status"></div>
-        <span id="loadingTexto">Buscando Informações...</span>
-        <p id="loadingDesc" style="font-size: 0.8rem; color: #888; margin-top: 10px;">Acessando Banco de Dados</p>
-        <button id="btnFecharOverlay" class="btn-fechar-overlay" onclick="fecharOverlay()">Voltar</button>
+        <div id="statusIcon" class="icon-status" style="font-size: 5rem;"></div>
+        <span id="loadingTexto">Buscando Dados...</span>
+        <p id="loadingDesc" style="font-size: 0.9rem; color: #666; margin-top: 10px;">Acessando o banco de dados da feira.</p>
+        <button id="btnFecharOverlay" class="btn-fechar-overlay" onclick="fecharOverlay()" style="border-radius: 12px; font-weight: 700;">Tentar Novamente</button>
     </div>
 
     <script src="script.js"></script>

@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feira Troca - Controle</title>
+    <title>Feira Troca - Administração</title>
     <link rel="stylesheet" href="style.css">
-
     <script>
         if (sessionStorage.getItem("dora_auth") !== "autorizado") {
             window.location.replace("index.html");
@@ -15,65 +14,67 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" style="max-width: 400px;">
+        <h3>🔐 Controle de Saldo</h3>
+
         <div class="cliente-info">
             <div class="busca-container">
-                <input type="text" id="nomeCliente" placeholder="Digite o RA ou CPF..." inputmode="numeric" maxlength="11"
+                <input type="text" id="nomeCliente" placeholder="RA ou CPF do Aluno" inputmode="numeric" maxlength="11"
                     oninput="this.value = this.value.replace(/\D/g, '')">
-                <button onclick="buscarPorIdUser()" class="btn-buscar">🔍 Buscar</button>
+                <button onclick="buscarPorIdUser()" class="btn-buscar">Buscar</button>
             </div>
 
-            <div class="info-cliente">
-                <p style="font-size: 0.9rem; font-weight: normal; margin-bottom: 8px; color: #555;">
-                    Usuário: <span id="nomeExibicao" style="font-weight: normal; color: #333;">---</span>
-                </p>
-                <p>Saldo: <span id="saldoPontos">0</span></p>
-
-                <p id="feedbackCesta" style="font-weight: bold; margin-top: -10px; display: none;">+0</p>
+            <div class="placar">
+                <span id="nomeExibicao" style="font-size: 0.85rem; color: #888; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Aguardando RA/CPF</span>
+                <span id="saldoPontos">0</span>
+                <span style="font-size: 0.8rem; color: #aaa; font-weight: 600;">Saldo Atual</span>
             </div>
 
             <div class="controles">
+                <!-- Fileira de Remoção (Vermelha) -->
                 <div class="linha-controles">
-                    <button onclick="acumularPontos(-5)" class="btn-subtrair">-5</button>
-                    <button onclick="acumularPontos(-10)" class="btn-subtrair">-10</button>
-                    <button onclick="acumularPontos(-30)" class="btn-subtrair">-30</button>
-                </div>
-                <div class="linha-controles">
-                    <button onclick="acumularPontos(5)" class="btn-adicionar">+5</button>
-                    <button onclick="acumularPontos(10)" class="btn-adicionar">+10</button>
-                    <button onclick="acumularPontos(30)" class="btn-adicionar">+30</button>
+                    <button onclick="adicionarAosPontosParaEnviar(-5)" class="btn-subtrair">-5</button>
+                    <button onclick="adicionarAosPontosParaEnviar(-10)" class="btn-subtrair">-10</button>
+                    <button onclick="adicionarAosPontosParaEnviar(-30)" class="btn-subtrair">-30</button>
                 </div>
 
-                <button id="btnSalvarPontos" onclick="enviarPontos()" class="btn-salvar" disabled
-                    style="margin-top: 15px;">Salvar Alterações</button>
+                <!-- Fileira de Adição (Verde) -->
+                <div class="linha-controles">
+                    <button onclick="adicionarAosPontosParaEnviar(5)" class="btn-adicionar">+5</button>
+                    <button onclick="adicionarAosPontosParaEnviar(10)" class="btn-adicionar">+10</button>
+                    <button onclick="adicionarAosPontosParaEnviar(30)" class="btn-adicionar">+30</button>
+                </div>
+
+                <div style="background: #fff; padding: 15px; border-radius: 12px; border: 1px dashed #ccc; margin-top: 10px;">
+                    <p id="labelStatusPontos" style="margin: 0; font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: 700;">Aguardando Seleção</p>
+                    <p id="previewPontos" style="margin: 5px 0; font-size: 1.5rem; font-weight: 800; color: #333;">0</p>
+                    <button id="btnSalvarPontos" onclick="enviarPontos()" class="btn-salvar" disabled>Confirmar Operação</button>
+                </div>
             </div>
 
             <div id="historicoTransacoes" class="extrato-container" style="display: none;">
-                <h4>Histórico de Movimentação</h4>
+                <h4 style="font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 12px; font-weight: 800; letter-spacing: 1px;">Histórico de Movimentações</h4>
                 <div id="listaExtrato"></div>
             </div>
 
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-            <div class="navegacao" style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px; align-items: center;">
+            <div class="navegacao" style="margin-top: 30px; display: flex; flex-direction: column; gap: 8px; align-items: center;">
                 <a href="index.html"
-                    style="text-decoration: none; display: block; background-color: #6c757d; color: white; padding: 12px; text-align: center; border-radius: 6px; font-weight: bold;">⬅️
-                    Voltar para a Home</a>
-                <button onclick="fazerLogout()" style="background: none; border: none; color: #999; font-size: 0.75rem; text-decoration: underline; cursor: pointer; margin-top: 10px;">Encerrar Sessão</button>
+                    style="text-decoration: none; width: 100%; box-sizing: border-box; background-color: #eee; color: #444; padding: 14px; text-align: center; border-radius: 12px; font-weight: 700; font-size: 0.95rem;">⬅️ Voltar ao Início</a>
+                <button onclick="fazerLogout()" style="background: none; border: none; color: #999; font-size: 0.75rem; text-decoration: underline; cursor: pointer; margin-top: 5px;">Encerrar Sessão</button>
             </div>
+        </div>
 
-            <div class="rodape-creditos">
-                Desenvolvido por <strong>José Oliveira</strong>
-            </div>
+        <div class="rodape-creditos">
+            Desenvolvido por <strong>José Oliveira</strong>
         </div>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
         <div id="loadingIcon" class="spinner"></div>
-        <div id="statusIcon" class="icon-status"></div>
-        <span id="loadingTexto">Buscando Informações...</span>
-        <p id="loadingDesc" style="font-size: 0.8rem; color: #888; margin-top: 10px;">Acessando Banco de Dados</p>
-        <button id="btnFecharOverlay" class="btn-fechar-overlay" onclick="fecharOverlay()">Voltar</button>
+        <div id="statusIcon" class="icon-status" style="font-size: 5rem;"></div>
+        <span id="loadingTexto">Processando...</span>
+        <p id="loadingDesc" style="font-size: 0.9rem; color: #666; margin-top: 10px; max-width: 250px;">Realizando transação segura no banco de dados.</p>
+        <button id="btnFecharOverlay" class="btn-fechar-overlay" onclick="fecharOverlay()" style="border-radius: 12px; font-weight: 700;">Entendido</button>
     </div>
 
     <script src="script.js"></script>

@@ -25,7 +25,6 @@ function tocarSomMoeda() {
 function abrirLoading(titulo, desc) {
     const loading = document.getElementById('loadingOverlay');
     if (!loading) return;
-
     document.getElementById('loadingIcon').style.display = 'block';
     document.getElementById('statusIcon').style.display = 'none';
     document.getElementById('btnFecharOverlay').style.display = 'none';
@@ -38,17 +37,14 @@ function abrirLoading(titulo, desc) {
 function showStatus(sucesso, titulo, desc) {
     const loading = document.getElementById('loadingOverlay');
     if (!loading) return;
-
     loading.style.display = 'flex';
     document.getElementById('loadingIcon').style.display = 'none';
     const sIcon = document.getElementById('statusIcon');
     sIcon.style.display = 'block';
     sIcon.innerText = sucesso ? '✅' : '❌';
-
     const lTexto = document.getElementById('loadingTexto');
     lTexto.innerText = titulo;
     lTexto.className = sucesso ? 'text-sucesso' : 'text-erro';
-
     document.getElementById('loadingDesc').innerText = desc;
     document.getElementById('btnFecharOverlay').style.display = sucesso ? 'none' : 'block';
 }
@@ -60,128 +56,116 @@ function fecharOverlay() {
 
 function fazerLogout() {
     sessionStorage.removeItem("dora_auth");
+    sessionStorage.removeItem("dora_admin_id");
+    sessionStorage.removeItem("dora_admin_pass");
     window.location.href = "index.html";
 }
 
 async function salvarCliente() {
     const idUser = document.getElementById('regIdUser').value.replace(/\D/g, '');
     const nome = document.getElementById('regNome').value.toUpperCase();
-
     if (idUser.length !== 8 && idUser.length !== 11) {
         showStatus(false, "Formato Inválido", "RA deve ter 8 números ou CPF deve ter 11 números.");
         return;
     }
     if (!nome) {
-        showStatus(false, "Erro no Nome", "Por favor, preencha o nome do usuário.");
+        showStatus(false, "Nome Vazio", "Por favor, digite o nome completo.");
         return;
     }
-
-    abrirLoading("Salvando Usuário...", "Registrando no banco de dados");
-
+    abrirLoading("Salvando...", "Registrando usuário");
     try {
-        const checar = await fetch(`${URL_PLANILHA}?idUser=${idUser}`);
-        const resultado = await checar.text();
-
-        if (resultado !== "Não encontrado") {
-            showStatus(false, "Usuário já existe!", "Este RA ou CPF já está cadastrado.");
-            return;
-        }
-
         await fetch(URL_PLANILHA, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({ idUser: idUser, nome: nome, pontos: 0 })
         });
-
         showStatus(true, "Sucesso!", "Usuário cadastrado com sucesso.");
-        setTimeout(() => window.location.href = "index.html", 2000);
-    } catch (error) {
-        showStatus(false, "Erro de Conexão", "Não foi possível salvar os dados.");
+        setTimeout(() => window.location.href = "index.html", 1500);
+    } catch (e) {
+        showStatus(false, "Erro", "Não foi possível conectar.");
     }
 }
 
 async function buscarPorIdUser() {
-    const idUserInput = document.getElementById('nomeCliente').value.replace(/\D/g, '');
+    const field = document.getElementById('nomeCliente');
+    if (!field) return; 
+    const idUserInput = field.value.replace(/\D/g, '');
     const displaySaldo = document.getElementById('saldoPontos');
     const displayNome = document.getElementById('nomeExibicao');
 
     if (idUserInput.length !== 8 && idUserInput.length !== 11) {
-        showStatus(false, "Formato Inválido", "RA deve ter 8 números ou CPF deve ter 11 números.");
+        showStatus(false, "ID Inválido", "Informe RA ou CPF corretos.");
         return;
     }
 
-    abrirLoading("Buscando Dados...", "Acessando banco de dados");
-    displaySaldo.innerText = "...";
-    displayNome.innerText = "Buscando...";
-
+    abrirLoading("Buscando...", "Acessando banco de dados");
     try {
         const response = await fetch(`${URL_PLANILHA}?idUser=${idUserInput}`);
         const texto = await response.text();
-
         if (texto === "Não encontrado") {
-            showStatus(false, "Não Encontrado", "Este RA ou CPF não consta no sistema.");
-            displaySaldo.innerText = "0";
-            displayNome.innerText = "---";
-            if (document.getElementById('historicoTransacoes')) document.getElementById('historicoTransacoes').style.display = 'none';
+            showStatus(false, "Não Encontrado", "RA ou CPF não cadastrado.");
+            window.idUserAtual = null;
         } else {
             fecharOverlay();
             const dados = JSON.parse(texto);
             displayNome.innerText = dados.nome;
             displaySaldo.innerText = dados.pontos;
-
-            const painelExtrato = document.getElementById('historicoTransacoes');
-            const listaExtrato = document.getElementById('listaExtrato');
-
-            if (painelExtrato && dados.historico && dados.historico.length > 0) {
-                painelExtrato.style.display = 'block';
-                listaExtrato.innerHTML = '';
-                dados.historico.forEach(item => {
-                    const strVal = item.valor.toString();
-                    const v = parseInt(strVal.replace(/\D/g, '')) || 0;
-                    let classeCor = 'valor-positivo';
-                    let sinalFormatado = strVal.includes('+') ? '+' : (strVal.includes('-') ? '-' : '');
-                    if (strVal.includes('-')) classeCor = 'valor-negativo';
-
-                    let dataAmigavel = item.data;
-                    try {
-                        const objData = new Date(item.data);
-                        if (!isNaN(objData.getTime())) {
-                            const dia = String(objData.getDate()).padStart(2, '0');
-                            const mes = String(objData.getMonth() + 1).padStart(2, '0');
-                            const hora = String(objData.getHours()).padStart(2, '0');
-                            const min = String(objData.getMinutes()).padStart(2, '0');
-                            dataAmigavel = `${dia}/${mes} às ${hora}:${min}`;
-                        }
-                    } catch (e) { }
-
-                    listaExtrato.innerHTML += `
-                        <div class="extrato-item">
-                            <span class="extrato-data" style="font-size: 0.85rem;">🕒 ${dataAmigavel}</span>
-                            <span class="extrato-valor ${classeCor}">${sinalFormatado}${v}</span>
-                        </div>
-                    `;
-                });
-            } else if (painelExtrato) {
-                painelExtrato.style.display = 'none';
-            }
-
+            
+            window.idUserAtual = idUserInput;
             window.pontosOriginais = parseInt(dados.pontos) || 0;
             window.pontosPendentes = 0;
-            window.idUserAtual = idUserInput;
+            if (document.getElementById('previewPontos')) document.getElementById('previewPontos').innerText = "0";
+            const label = document.getElementById('labelStatusPontos');
+            if (label) {
+                label.innerText = "Aguardando Seleção";
+                label.style.color = "#888";
+            }
+            if (document.getElementById('btnSalvarPontos')) document.getElementById('btnSalvarPontos').disabled = true;
+            
+            const pExtrato = document.getElementById('historicoTransacoes');
+            const lExtrato = document.getElementById('listaExtrato');
+            if (pExtrato) {
+                if (dados.historico && dados.historico.length > 0) {
+                    pExtrato.style.display = 'block';
+                    lExtrato.innerHTML = '';
+                    dados.historico.forEach(item => {
+                        const strVal = item.valor.toString();
+                        const v = parseInt(strVal.replace(/[^\d]/g, '')) || 0;
+                        const classeCor = strVal.includes('-') ? 'valor-negativo' : 'valor-positivo';
+                        const sinal = strVal.includes('-') ? '-' : '+';
 
-            const btnSalvar = document.getElementById('btnSalvarPontos');
-            if (btnSalvar) btnSalvar.disabled = true;
-            const feedbackCesta = document.getElementById('feedbackCesta');
-            if (feedbackCesta) feedbackCesta.style.display = 'none';
+                        let dataAmigavel = item.data;
+                        try {
+                            const objData = new Date(item.data);
+                            if (!isNaN(objData.getTime())) {
+                                const dia = String(objData.getDate()).padStart(2, '0');
+                                const mes = String(objData.getMonth() + 1).padStart(2, '0');
+                                const hora = String(objData.getHours()).padStart(2, '0');
+                                const min = String(objData.getMinutes()).padStart(2, '0');
+                                dataAmigavel = `${dia}/${mes} às ${hora}:${min}`;
+                            }
+                        } catch (e) { }
+
+                        lExtrato.innerHTML += `
+                            <div class="extrato-item">
+                                <span class="extrato-data" style="font-size: 0.8rem;">🕒 ${dataAmigavel}</span>
+                                <span class="extrato-valor ${classeCor}">${sinal}${v}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    pExtrato.style.display = 'none';
+                }
+            }
         }
-    } catch (error) {
-        showStatus(false, "Erro de Conexão", "Não foi possível conectar à planilha.");
+    } catch (e) {
+        showStatus(false, "Erro", "Falha na conexão.");
     }
 }
 
-function acumularPontos(quantidade) {
+function adicionarAosPontosParaEnviar(quantidade) {
     if (!window.idUserAtual) {
-        showStatus(false, "Usuário Ausente", "Busque o RA ou CPF antes de alterar pontos.");
+        showStatus(false, "Busque o Usuário", "Pesquise o RA ou CPF primeiro.");
         return;
     }
     let novaSoma = (window.pontosPendentes || 0) + quantidade;
@@ -190,13 +174,24 @@ function acumularPontos(quantidade) {
         return;
     }
     window.pontosPendentes = novaSoma;
-    document.getElementById('saldoPontos').innerText = window.pontosOriginais;
-    const feedback = document.getElementById('feedbackCesta');
-    if (feedback) {
-        feedback.style.display = window.pontosPendentes !== 0 ? 'block' : 'none';
-        feedback.style.color = window.pontosPendentes > 0 ? '#28a745' : '#dc3545';
-        feedback.innerText = (window.pontosPendentes > 0 ? 'Acrescentando: +' : 'Removendo: ') + window.pontosPendentes;
+    // Atualiza o texto e a cor do status
+    const label = document.getElementById('labelStatusPontos');
+    const preview = document.getElementById('previewPontos');
+    if (preview) preview.innerText = (window.pontosPendentes > 0 ? "+" : "") + window.pontosPendentes;
+    
+    if (label) {
+        if (window.pontosPendentes > 0) {
+            label.innerText = "Pontos a acrescentar";
+            label.style.color = "var(--success)";
+        } else if (window.pontosPendentes < 0) {
+            label.innerText = "Pontos a remover";
+            label.style.color = "var(--danger)";
+        } else {
+            label.innerText = "Aguardando Seleção";
+            label.style.color = "#888";
+        }
     }
+    
     const btnSalvar = document.getElementById('btnSalvarPontos');
     if (btnSalvar) btnSalvar.disabled = (window.pontosPendentes === 0);
 }
@@ -204,55 +199,30 @@ function acumularPontos(quantidade) {
 async function enviarPontos() {
     if (!window.idUserAtual || window.pontosPendentes === 0) return;
     tocarSomMoeda();
-    const idUserInput = window.idUserAtual;
-    const quantidadeTotalAEnviar = window.pontosPendentes;
+    
+    const idDestino = window.idUserAtual;
+    const valorMudar = window.pontosPendentes;
     window.pontosPendentes = 0;
 
-    const btn = document.getElementById('btnSalvarPontos');
-    btn.disabled = true;
+    const adminId = sessionStorage.getItem("dora_admin_id") || "";
+    const adminPass = sessionStorage.getItem("dora_admin_pass") || "";
 
+    abrirLoading("Enviando...", "Validando permissões e salvando");
     try {
-        abrirLoading("Enviando...", "Validando permissões e atualizando saldo");
-
-        const adminId = sessionStorage.getItem("dora_admin_id") || "";
-        const adminPass = sessionStorage.getItem("dora_admin_pass") || "";
-
         await fetch(URL_PLANILHA, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({
                 action: "update",
-                idUser: idUserInput,
-                valor: quantidadeTotalAEnviar,
+                idUser: idDestino,
+                valor: valorMudar,
                 adminId: adminId,
                 adminPass: adminPass
             })
         });
-        showStatus(true, "Sucesso!", "Saldo atualizado com sucesso.");
-        setTimeout(() => {
-            fecharOverlay();
-            btn.disabled = false;
-            buscarPorIdUser();
-        }, 1500);
-    } catch (error) {
-        showStatus(false, "Erro ao Salvar", "Não foi possível atualizar o saldo.");
+        showStatus(true, "Sucesso!", "Saldo atualizado!");
+        setTimeout(() => { fecharOverlay(); buscarPorIdUser(); }, 1500);
+    } catch (e) {
+        showStatus(false, "Erro", "Não foi possível salvar.");
     }
 }
-
-let tempoInatividade;
-function resetarCronometro() {
-    clearTimeout(tempoInatividade);
-    if (sessionStorage.getItem("dora_auth") === "autorizado") {
-        tempoInatividade = setTimeout(() => {
-            sessionStorage.removeItem("dora_auth");
-            showStatus(false, "Sessão Expirada", "Sua sessão expirou por inatividade.");
-            const btn = document.getElementById('btnFecharOverlay');
-            if (btn) btn.onclick = () => window.location.href = "index.html";
-        }, 10 * 60 * 1000);
-    }
-}
-
-['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll'].forEach(evento => {
-    document.addEventListener(evento, resetarCronometro);
-});
-resetarCronometro();
