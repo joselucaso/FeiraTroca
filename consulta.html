@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feira Troca - Saldo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h3>📊 Meus Pontos</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px; line-height: 1.5;">Consulte seu saldo e histórico usando<br>apenas o seu RA ou CPF.</p>
+
+        <div class="cliente-info">
+            <div class="busca-container">
+                <input type="text" id="nomeCliente" placeholder="RA ou CPF" inputmode="numeric" maxlength="11"
+                    oninput="this.value = this.value.replace(/\D/g, '')">
+                <button onclick="buscarPorIdUser()" class="btn-buscar">Buscar</button>
+            </div>
+
+            <div class="placar">
+                <span id="nomeExibicao" style="font-size: 0.85rem; color: #888; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Aguardando Busca</span>
+                <span id="saldoPontos">0</span>
+                <span style="font-size: 0.8rem; color: #aaa; font-weight: 600;">DoraCoins</span>
+            </div>
+
+            <div id="historicoTransacoes" class="extrato-container" style="display: none;">
+                <h4 style="font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 15px; font-weight: 800; letter-spacing: 1px;">Últimas Movimentações</h4>
+                <div id="listaExtrato"></div>
+            </div>
+
+            <div class="navegacao" style="margin-top: 30px; display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                <a href="index.html"
+                    style="text-decoration: none; width: 100%; box-sizing: border-box; background-color: #eee; color: #444; padding: 14px; text-align: center; border-radius: 12px; font-weight: 700; font-size: 0.95rem;">⬅️ Voltar ao Início</a>
+            </div>
+        </div>
+
+        <div class="rodape-creditos">
+            Desenvolvido por <strong>José Oliveira</strong>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div id="loadingIcon" class="spinner"></div>
+        <div id="statusIcon" class="icon-status" style="font-size: 5rem;"></div>
+        <span id="loadingTexto">Buscando Dados...</span>
+        <p id="loadingDesc" style="font-size: 0.9rem; color: #666; margin-top: 10px;">Acessando o banco de dados da feira.</p>
+        <button id="btnFecharOverlay" class="btn-fechar-overlay" onclick="fecharOverlay()" style="border-radius: 12px; font-weight: 700;">Tentar Novamente</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
