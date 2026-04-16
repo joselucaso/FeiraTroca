@@ -1,4 +1,4 @@
-const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbzIZP5IguEzbnHGrr8nlmDqzmsCX5ykirWmehdyN24HHBwh6ca2lZFh76SqBYW6aeZRhw/exec";
+const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbwljSjZShcbjDiJy5bZcrihtAf8d-YuFF48HJwLNPeaCnFZrZSKcbTfYGGTHnM7-NPqYg/exec";
 
 function tocarSomMoeda() {
     try {
@@ -88,7 +88,7 @@ async function salvarCliente() {
 
 async function buscarPorIdUser() {
     const field = document.getElementById('nomeCliente');
-    if (!field) return; 
+    if (!field) return;
     const idUserInput = field.value.replace(/\D/g, '');
     const displaySaldo = document.getElementById('saldoPontos');
     const displayNome = document.getElementById('nomeExibicao');
@@ -110,7 +110,7 @@ async function buscarPorIdUser() {
             const dados = JSON.parse(texto);
             displayNome.innerText = dados.nome;
             displaySaldo.innerText = dados.pontos;
-            
+
             window.idUserAtual = idUserInput;
             window.pontosOriginais = parseInt(dados.pontos) || 0;
             window.pontosPendentes = 0;
@@ -121,7 +121,7 @@ async function buscarPorIdUser() {
                 label.style.color = "#888";
             }
             if (document.getElementById('btnSalvarPontos')) document.getElementById('btnSalvarPontos').disabled = true;
-            
+
             const pExtrato = document.getElementById('historicoTransacoes');
             const lExtrato = document.getElementById('listaExtrato');
             if (pExtrato) {
@@ -178,7 +178,7 @@ function adicionarAosPontosParaEnviar(quantidade) {
     const label = document.getElementById('labelStatusPontos');
     const preview = document.getElementById('previewPontos');
     if (preview) preview.innerText = (window.pontosPendentes > 0 ? "+" : "") + window.pontosPendentes;
-    
+
     if (label) {
         if (window.pontosPendentes > 0) {
             label.innerText = "Pontos a acrescentar";
@@ -191,7 +191,7 @@ function adicionarAosPontosParaEnviar(quantidade) {
             label.style.color = "#888";
         }
     }
-    
+
     const btnSalvar = document.getElementById('btnSalvarPontos');
     if (btnSalvar) btnSalvar.disabled = (window.pontosPendentes === 0);
 }
@@ -199,7 +199,7 @@ function adicionarAosPontosParaEnviar(quantidade) {
 async function enviarPontos() {
     if (!window.idUserAtual || window.pontosPendentes === 0) return;
     tocarSomMoeda();
-    
+
     const idDestino = window.idUserAtual;
     const valorMudar = window.pontosPendentes;
     window.pontosPendentes = 0;
