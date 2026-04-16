@@ -1,4 +1,4 @@
-const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbx3uyKUo_tQYGvsZpKGBVvm8Ykg5yfjDoQg8XK5apxTUwwawR65SrymH9hYfmcjQVbKUg/exec";
+const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbxHmrNm7GEWvpyuNwpbIyWEVm9-NXCNJUvJ5kOPdOykURjkTl0nCgRSc5HyYnuXc1qwfQ/exec";
 
 function tocarSomMoeda() {
     try {
@@ -110,6 +110,14 @@ async function buscarPorIdUser() {
             const dados = JSON.parse(texto);
             displayNome.innerText = dados.nome;
             displaySaldo.innerText = dados.pontos;
+
+            // Lógica do QR Code
+            const areaQR = document.getElementById('areaQRCode');
+            const imgQR = document.getElementById('imgQRCode');
+            if (areaQR && imgQR) {
+                imgQR.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${idUserInput}`;
+                areaQR.style.display = 'block';
+            }
 
             window.idUserAtual = idUserInput;
             window.pontosOriginais = parseInt(dados.pontos) || 0;
@@ -226,3 +234,53 @@ async function enviarPontos() {
         showStatus(false, "Erro", "Não foi possível salvar.");
     }
 }
+
+// --- NOVO: LÓGICA DO SCANNER (v1.1.0) ---
+let html5QrCode = null;
+
+function abrirScanner() {
+    const readerDiv = document.getElementById('reader');
+    if (!readerDiv) return;
+
+    abrirLoading("Aponte a Câmera", "Posicione o QR Code no quadrado abaixo.");
+    document.getElementById('loadingIcon').style.display = 'none'; // Esconde spinner
+    readerDiv.style.display = 'block';
+
+    html5QrCode = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+        // Sucesso ao ler
+        document.getElementById('nomeCliente').value = decodedText;
+        fecharScanner();
+        buscarPorIdUser();
+    }).catch((err) => {
+        console.warn("Erro ao iniciar câmera: ", err);
+        showStatus(false, "Erro na Câmera", "Dê permissão e use HTTPS.");
+        readerDiv.style.display = 'none';
+    });
+}
+
+function fecharScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('reader').style.display = 'none';
+            fecharOverlay();
+        }).catch(err => console.error(err));
+    } else {
+        fecharOverlay();
+    }
+}
+
+// Alterar o fecharOverlay original para parar o scanner se estiver aberto
+const originalFecharOverlay = fecharOverlay;
+fecharOverlay = function () {
+    if (document.getElementById('reader') && document.getElementById('reader').style.display === 'block') {
+        if (html5QrCode) html5QrCode.stop().finally(() => {
+            document.getElementById('reader').style.display = 'none';
+            originalFecharOverlay();
+        });
+    } else {
+        originalFecharOverlay();
+    }
+};
