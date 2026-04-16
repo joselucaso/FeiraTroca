@@ -1,4 +1,4 @@
-const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbxHmrNm7GEWvpyuNwpbIyWEVm9-NXCNJUvJ5kOPdOykURjkTl0nCgRSc5HyYnuXc1qwfQ/exec";
+const URL_PLANILHA = "https://script.google.com/macros/s/AKfycby0Snt4dum_6LXYCcrhmL7XxkE1NvGhOrEB1X-xJTFj49FtNPWlNFIz4oltbnc5ixkIzQ/exec";
 
 function tocarSomMoeda() {
     try {
