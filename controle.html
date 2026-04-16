@@ -78,6 +78,20 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // Lógica de Carregamento Automático via QR Code
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const idUserUrl = params.get('idUser');
+            if (idUserUrl) {
+                const inputBusca = document.getElementById('nomeCliente');
+                if (inputBusca) {
+                    inputBusca.value = idUserUrl;
+                    buscarPorIdUser(); // Trigger automático da busca
+                }
+            }
+        };
+    </script>
 </body>
 
 </html>

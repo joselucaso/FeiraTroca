@@ -1,4 +1,4 @@
-const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbwljSjZShcbjDiJy5bZcrihtAf8d-YuFF48HJwLNPeaCnFZrZSKcbTfYGGTHnM7-NPqYg/exec";
+const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbziOKaJyBo-nri3XuAzDzOXh07rOj7c-aVg3puOVhM5V9wW5W980QLE1MVlnHg4pFGhLQ/exec";
 
 function tocarSomMoeda() {
     try {
@@ -111,6 +111,17 @@ async function buscarPorIdUser() {
             displayNome.innerText = dados.nome;
             displaySaldo.innerText = dados.pontos;
 
+            // --- Lógica do QR Code para Admin ---
+            const containerQr = document.getElementById('containerQrAdmin');
+            const imgQr = document.getElementById('qrAdmin');
+            if (containerQr && imgQr) {
+                // Remove qualquer barra final da URL atual e aponta para controle.html
+                const urlBase = window.location.href.split('consulta.html')[0];
+                const urlControle = `${urlBase}controle.html?idUser=${idUserInput}`;
+                imgQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlControle)}`;
+                containerQr.style.display = 'block';
+            }
+
             window.idUserAtual = idUserInput;
             window.pontosOriginais = parseInt(dados.pontos) || 0;
             window.pontosPendentes = 0;
@@ -129,7 +140,7 @@ async function buscarPorIdUser() {
                     pExtrato.style.display = 'block';
                     lExtrato.innerHTML = '';
                     dados.historico.forEach(item => {
-                        const strVal = item.valor.toString();
+                        const strVal = item.pontos.toString();
                         const v = parseInt(strVal.replace(/[^\d]/g, '')) || 0;
                         const classeCor = strVal.includes('-') ? 'valor-negativo' : 'valor-positivo';
                         const sinal = strVal.includes('-') ? '-' : '+';
@@ -215,7 +226,7 @@ async function enviarPontos() {
             body: JSON.stringify({
                 action: "update",
                 idUser: idDestino,
-                valor: valorMudar,
+                pontos: valorMudar,
                 adminId: adminId,
                 adminPass: adminPass
             })
