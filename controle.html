@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feira Troca - Administração</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
         if (sessionStorage.getItem("dora_auth") !== "autorizado") {
             window.location.replace("index.html");
@@ -20,10 +19,9 @@
 
         <div class="cliente-info">
             <div class="busca-container">
-                <input type="text" id="nomeCliente" placeholder="RA ou CPF" inputmode="numeric" maxlength="11"
+                <input type="text" id="nomeCliente" placeholder="RA ou CPF do Aluno" inputmode="numeric" maxlength="11"
                     oninput="this.value = this.value.replace(/\D/g, '')">
                 <button onclick="buscarPorIdUser()" class="btn-buscar">Buscar</button>
-                <button onclick="abrirScanner()" class="btn-buscar" style="background: #6f42c1; padding: 10px;" title="Escanear QR Code">📸</button>
             </div>
 
             <div class="placar">
@@ -67,15 +65,11 @@
         </div>
 
         <div class="rodape-creditos">
-            Desenvolvido por <strong>José Oliveira</strong><br>
-            <span style="opacity: 0.5; font-size: 0.65rem;">v1.1.0</span>
+            Desenvolvido por <strong>José Oliveira</strong>
         </div>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
-        <!-- Div para o Scanner -->
-        <div id="reader" style="width: 300px; display: none; background: white; border-radius: 15px; overflow: hidden; margin-bottom: 20px;"></div>
-        
         <div id="loadingIcon" class="spinner"></div>
         <div id="statusIcon" class="icon-status" style="font-size: 5rem;"></div>
         <span id="loadingTexto">Processando...</span>

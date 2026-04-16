@@ -1,4 +1,4 @@
-const URL_PLANILHA = "https://script.google.com/macros/s/AKfycby0Snt4dum_6LXYCcrhmL7XxkE1NvGhOrEB1X-xJTFj49FtNPWlNFIz4oltbnc5ixkIzQ/exec";
+const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbzIZP5IguEzbnHGrr8nlmDqzmsCX5ykirWmehdyN24HHBwh6ca2lZFh76SqBYW6aeZRhw/exec";
 
 function tocarSomMoeda() {
     try {
@@ -88,7 +88,7 @@ async function salvarCliente() {
 
 async function buscarPorIdUser() {
     const field = document.getElementById('nomeCliente');
-    if (!field) return;
+    if (!field) return; 
     const idUserInput = field.value.replace(/\D/g, '');
     const displaySaldo = document.getElementById('saldoPontos');
     const displayNome = document.getElementById('nomeExibicao');
@@ -110,15 +110,7 @@ async function buscarPorIdUser() {
             const dados = JSON.parse(texto);
             displayNome.innerText = dados.nome;
             displaySaldo.innerText = dados.pontos;
-
-            // Lógica do QR Code
-            const areaQR = document.getElementById('areaQRCode');
-            const imgQR = document.getElementById('imgQRCode');
-            if (areaQR && imgQR) {
-                imgQR.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${idUserInput}`;
-                areaQR.style.display = 'block';
-            }
-
+            
             window.idUserAtual = idUserInput;
             window.pontosOriginais = parseInt(dados.pontos) || 0;
             window.pontosPendentes = 0;
@@ -129,7 +121,7 @@ async function buscarPorIdUser() {
                 label.style.color = "#888";
             }
             if (document.getElementById('btnSalvarPontos')) document.getElementById('btnSalvarPontos').disabled = true;
-
+            
             const pExtrato = document.getElementById('historicoTransacoes');
             const lExtrato = document.getElementById('listaExtrato');
             if (pExtrato) {
@@ -186,7 +178,7 @@ function adicionarAosPontosParaEnviar(quantidade) {
     const label = document.getElementById('labelStatusPontos');
     const preview = document.getElementById('previewPontos');
     if (preview) preview.innerText = (window.pontosPendentes > 0 ? "+" : "") + window.pontosPendentes;
-
+    
     if (label) {
         if (window.pontosPendentes > 0) {
             label.innerText = "Pontos a acrescentar";
@@ -199,7 +191,7 @@ function adicionarAosPontosParaEnviar(quantidade) {
             label.style.color = "#888";
         }
     }
-
+    
     const btnSalvar = document.getElementById('btnSalvarPontos');
     if (btnSalvar) btnSalvar.disabled = (window.pontosPendentes === 0);
 }
@@ -207,7 +199,7 @@ function adicionarAosPontosParaEnviar(quantidade) {
 async function enviarPontos() {
     if (!window.idUserAtual || window.pontosPendentes === 0) return;
     tocarSomMoeda();
-
+    
     const idDestino = window.idUserAtual;
     const valorMudar = window.pontosPendentes;
     window.pontosPendentes = 0;
@@ -234,53 +226,3 @@ async function enviarPontos() {
         showStatus(false, "Erro", "Não foi possível salvar.");
     }
 }
-
-// --- NOVO: LÓGICA DO SCANNER (v1.1.0) ---
-let html5QrCode = null;
-
-function abrirScanner() {
-    const readerDiv = document.getElementById('reader');
-    if (!readerDiv) return;
-
-    abrirLoading("Aponte a Câmera", "Posicione o QR Code no quadrado abaixo.");
-    document.getElementById('loadingIcon').style.display = 'none'; // Esconde spinner
-    readerDiv.style.display = 'block';
-
-    html5QrCode = new Html5Qrcode("reader");
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-    html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-        // Sucesso ao ler
-        document.getElementById('nomeCliente').value = decodedText;
-        fecharScanner();
-        buscarPorIdUser();
-    }).catch((err) => {
-        console.warn("Erro ao iniciar câmera: ", err);
-        showStatus(false, "Erro na Câmera", "Dê permissão e use HTTPS.");
-        readerDiv.style.display = 'none';
-    });
-}
-
-function fecharScanner() {
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            document.getElementById('reader').style.display = 'none';
-            fecharOverlay();
-        }).catch(err => console.error(err));
-    } else {
-        fecharOverlay();
-    }
-}
-
-// Alterar o fecharOverlay original para parar o scanner se estiver aberto
-const originalFecharOverlay = fecharOverlay;
-fecharOverlay = function () {
-    if (document.getElementById('reader') && document.getElementById('reader').style.display === 'block') {
-        if (html5QrCode) html5QrCode.stop().finally(() => {
-            document.getElementById('reader').style.display = 'none';
-            originalFecharOverlay();
-        });
-    } else {
-        originalFecharOverlay();
-    }
-};
