@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feira Troca - Administração</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
         if (sessionStorage.getItem("dora_auth") !== "autorizado") {
             window.location.replace("index.html");
@@ -18,10 +19,30 @@
         <h3>🔐 Controle de Saldo</h3>
 
         <div class="cliente-info">
-            <div class="busca-container">
-                <input type="text" id="nomeCliente" placeholder="RA ou CPF do Aluno" inputmode="numeric" maxlength="11"
-                    oninput="this.value = this.value.replace(/\D/g, '')">
-                <button onclick="buscarPorIdUser()" class="btn-buscar">Buscar</button>
+            <div class="busca-container" style="display: flex; gap: 6px; width: 100%; align-items: stretch;">
+                <input type="text" id="nomeCliente" placeholder="Pesquisar RA ou CPF..." inputmode="numeric" maxlength="11"
+                    style="flex: 1; min-width: 0; padding: 12px; text-align: left; font-size: 0.95rem;" oninput="this.value = this.value.replace(/\D/g, '')">
+                
+                <button onclick="buscarPorIdUser()" class="btn-buscar" style="width: 120px; padding: 0; font-size: 0.95rem; height: 48px; border-radius: 12px; flex-shrink: 0; font-weight: 700;">Buscar</button>
+                
+                <button onclick="abrirLeitorQR()" style="width: 60px; height: 48px; background: #333; color: white; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" title="Ler QR Code">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                        <path d="M7 7h.01"></path>
+                        <path d="M17 7h.01"></path>
+                        <path d="M17 17h.01"></path>
+                        <path d="M7 17h.01"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Área do Scanner de QR Code -->
+            <div id="scanner-container" style="display: none; margin-top: 15px; background: #000; border-radius: 15px; overflow: hidden; position: relative; border: 4px solid #333;">
+                <div id="reader" style="width: 100%;"></div>
+                <button onclick="fecharLeitorQR()" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">X</button>
             </div>
 
             <div class="placar">
@@ -79,7 +100,66 @@
 
     <script src="script.js"></script>
     <script>
-        // Lógica de Carregamento Automático via QR Code
+        let html5QrCode;
+
+        async function abrirLeitorQR() {
+            const container = document.getElementById('scanner-container');
+            container.style.display = 'block';
+            
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            try {
+                await html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    config,
+                    (decodedText) => {
+                        // Sucesso na leitura
+                        fecharLeitorQR();
+                        processarLinkQR(decodedText);
+                    }
+                );
+            } catch (err) {
+                alert("Erro ao abrir a câmera: " + err);
+                container.style.display = 'none';
+            }
+        }
+
+        function fecharLeitorQR() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('scanner-container').style.display = 'none';
+                }).catch(() => {
+                    document.getElementById('scanner-container').style.display = 'none';
+                });
+            } else {
+                document.getElementById('scanner-container').style.display = 'none';
+            }
+        }
+
+        function processarLinkQR(texto) {
+            try {
+                // Tenta extrair o idUser da URL escaneada
+                const url = new URL(texto);
+                const idUser = url.searchParams.get("idUser");
+                if (idUser) {
+                    document.getElementById('nomeCliente').value = idUser;
+                    buscarPorIdUser();
+                } else {
+                    alert("QR Code inválido ou sem ID de usuário.");
+                }
+            } catch (e) {
+                // Se não for uma URL, tenta usar o texto puro caso seja apenas o ID
+                if (texto.length >= 8 && texto.length <= 11) {
+                    document.getElementById('nomeCliente').value = texto.replace(/\D/g, '');
+                    buscarPorIdUser();
+                } else {
+                    alert("O conteúdo lido não parece ser um código válido.");
+                }
+            }
+        }
+
+        // Lógica de Carregamento Automático via URL (existente)
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             const idUserUrl = params.get('idUser');
@@ -87,7 +167,7 @@
                 const inputBusca = document.getElementById('nomeCliente');
                 if (inputBusca) {
                     inputBusca.value = idUserUrl;
-                    buscarPorIdUser(); // Trigger automático da busca
+                    buscarPorIdUser();
                 }
             }
         };
